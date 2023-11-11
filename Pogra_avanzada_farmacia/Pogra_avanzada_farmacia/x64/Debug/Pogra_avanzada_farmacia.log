@@ -1,2 +1,4 @@
 ﻿  Pogra_avanzada_farmacia.cpp
+C:\Users\ASUS\Documents\GitHub\Programacion_avanzada_Farmacia\Pogra_avanzada_farmacia\Pogra_avanzada_farmacia\Pogra_avanzada_farmacia.cpp(130,26): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ASUS\Documents\GitHub\Programacion_avanzada_Farmacia\Pogra_avanzada_farmacia\Pogra_avanzada_farmacia\Pogra_avanzada_farmacia.cpp(78): warning C4715: 'Farmacia::dar': not all control paths return a value
   Pogra_avanzada_farmacia.vcxproj -> C:\Users\ASUS\Documents\GitHub\Programacion_avanzada_Farmacia\Pogra_avanzada_farmacia\x64\Debug\Pogra_avanzada_farmacia.exe

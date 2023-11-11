@@ -1,201 +1,398 @@
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <list>
-#include <algorithm> // para sort
+#include <windows.h>
+#include <map>
+#include <thread>
+#include <conio.h>
 
 using namespace std;
 
-// Clase Medicamento
 class Medicamento {
 public:
-    std::string nombre;
-    int numeroRegistro;
-    std::string categoria;
-    std::string principiosActivos;
-    std::string dosisRecomendada;
+    string nom;
+    string numRegis;
+    string categ;
+    string prinAct;
+    string dosrec;
+
+    Medicamento() = default;
+
+    Medicamento(string nom, string numRegis, string categ, string prinAct, string dosrec)
+        : nom(nom), numRegis(numRegis), categ(categ), prinAct(prinAct), dosrec(dosrec) {}
 };
 
-// Clase Proveedor
 class Proveedor {
 public:
-    std::string nombre;
-    int nit;
-    std::string direccionFiscal;
-    std::string contactoNombre;
-    std::string contactoTelefono;
-    std::string contactoCorreo;
+
+    string nom;
+    string nit;
+    string direcFiscal;
+    string direcContacto;
+    string celular;
+    string correo;
+
+    Proveedor(string nom, string nit, string direcFiscal, string direcContacto, string celular, string correo)
+        : nom(nom), nit(nit), direcFiscal(direcFiscal), direcContacto(direcContacto), celular(celular), correo(correo) {}
 };
 
-// Clase Inventario
 class Inventario {
 public:
-    int cantidadEnStock;
+    int cantStock;
     string fechaCaducidad;
     Proveedor proveedor;
-    double precioCompra;
-    double precioVenta;
+    double precCompra;
+    double precVenta;
+   
+    Inventario(int cantStock, string fechaCaducidad, Proveedor proveedor, double precCompra, double precVenta)
+        : cantStock(cantStock), fechaCaducidad(fechaCaducidad), proveedor(proveedor), precCompra(precCompra), precVenta(precVenta) {}
 };
 
-// Clase Farmacia
 class Farmacia {
 private:
-    std::list<Medicamento> medicamentos;
-    std::list<Proveedor> proveedores;
-    std::list<Inventario> inventario;
+    list<Medicamento> medic;
+    list<Proveedor> prov;
+    list<Inventario> invent;
 
 public:
-    // Métodos para gestionar medicamentos
+
     void pausa() {
         string uno;
         cin >> uno;
     }
 
-    void agregarMedicamento(Medicamento& medicamento) {
-        system("cls");
-        medicamentos.push_back(medicamento);
+    void gotoxy(int x, int y) {
+        COORD coordinates;
+        coordinates.X = x;
+        coordinates.Y = y;
+        SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coordinates);
     }
 
-    void actualizarMedicamento(const string& nombre, Medicamento& medicamento) {
-        system("cls");
-        auto it = find_if(medicamentos.begin(), medicamentos.end(), [&nombre](const Medicamento& m) {
-            return m.nombre == nombre;
-            });
-
-        if (it != medicamentos.end()) {
-            *it = medicamento;
-            cout << "Medicamento actualizado correctamente." << endl;
-        }
-        else {
-            cout << "Error: Medicamento no encontrado." << endl;
-        }
-        pausa();
-    }
-
-    Medicamento consultarMedicamento(string& clave) {
-        auto it = std::find_if(medicamentos.begin(), medicamentos.end(), [&clave](const Medicamento& m) {
-            return m.nombre == clave || m.principiosActivos == clave;
-            });
-
-        if (it != medicamentos.end()) {
-            return *it;
-        }
-        else {
-            throw std::runtime_error("Error: Medicamento no encontrado.");
-        }
-    }
-
-    // Métodos para gestionar proveedores
-    void agregarProveedor(Proveedor& proveedor) {
-        proveedores.push_back(proveedor);
-    }
-
-    // Métodos para gestionar inventario
-    void agregarInventario(Inventario& inventarioItem) {
-        inventario.push_back(inventarioItem);
-    }
-
-    void mostrarInventarioPorNombre(std::string& nombre) {
-        auto it = std::find_if(inventario.begin(), inventario.end(), [&nombre](Inventario& item) {
-            return item.proveedor.nombre == nombre;
-            });
-
-        if (it != inventario.end()) {
-            std::cout << "Proveedor: " << it->proveedor.nombre << std::endl;
-            std::cout << "Cantidad en Stock: " << it->cantidadEnStock << std::endl;
-            std::cout << "Fecha de Caducidad: " << it->fechaCaducidad << std::endl;
-            // ... Mostrar otros detalles del inventario ...
-        }
-        else {
-            std::cout << "Error: Medicamento no encontrado en el inventario." << std::endl;
-        }
-    }
-
-    void mostrarMedicamentoMasCaroPorProveedor(const std::string& nombreProveedor) {
-        auto it = std::find_if(inventario.begin(), inventario.end(), [&nombreProveedor](const Inventario& item) {
-            return item.proveedor.nombre == nombreProveedor;
-            });
-
-        if (it != inventario.end()) {
-            std::cout << "Proveedor: " << it->proveedor.nombre << std::endl;
-            // ... Mostrar otros detalles del medicamento más caro ...
-        }
-        else {
-            std::cout << "Error: Proveedor no encontrado en el inventario." << std::endl;
-        }
-    }
-
-    void buscarMedicamentos(string& criterio) {
-        // Ejemplo: Búsqueda por principio activo
-        auto it = std::find_if(medicamentos.begin(), medicamentos.end(), [&criterio](Medicamento& m) {
-            return m.principiosActivos == criterio;
-            });
-
-        if (it != medicamentos.end()) {
-            cout << "Medicamento encontrado: " << it->nombre << std::endl;
-        }
-        else {
-            cout << "Error: Medicamento no encontrado con el criterio especificado." << std::endl;
-        }
-    }
-
-    // Funcionalidades adicionales
-    void generarInformeCSV();
-    double calcularPrecioPromedio();
-
-    // Menú principal
-
-    void mostrarMenu() {
-        Medicamento medicamentos;
-
-        int numero = 0;
-
-        while (numero != 9)
+    Proveedor dar(string nombre) {
+        for (Proveedor med : prov)
         {
-            system("cls");
-            cout << "1.Registro de nuevos medicamentos y su inventario." << endl;
-            cout << "2.Actualizacion de detalles de los medicamentos y su disponibilidad en el inventario." << endl;
-            cout << "3.Consulta de información sobre un medicamento específico por el nombre o principio activo." << endl;
-            cout << "4.Generacion de informes sobre los medicamentos, generando un listado con la información del medicamento, brindando la opción de exportar la información a un archivo CSV ordenado por nombre del medicamento." << endl;
-            cout << "5.Calcular el precio promedio de todos los medicamentos disponibles en farmacia." << endl;
-            cout << "6.Dado el nombre de un medicamento, mostrar sus datos de inventario." << endl;
-            cout << "7.Dado un proveedor conocer el medicamento con el precio más alto que distribuye a la farmacia." << endl;
-            cout << "8.Busqueda y filtrado de medicamentos por diferentes criterios(por ejemplo, por categoría, por principio activo, por proveedor, por fecha de caducidad)." << endl;
-
-            cin >> numero;
-
-            switch (numero)
-            {
-            case 1:
-                cout << "Ingrese el nombre del medicamento" << endl;
-                cin >> medicamentos.nombre;
-
-                cout << "Ingrese el numero de registro" << endl;
-                cin >> medicamentos.numeroRegistro;
-
-                cout << "Ingrese categoria (por ejemplo, medicamentos de venta libre o con receta)" << endl;
-                cin >> medicamentos.categoria;
-
-                cout << "Ingrese principios activos" << endl;
-                cin >> medicamentos.principiosActivos;
-
-                cout << "Ingrese dosis recomendada" << endl;
-                cin >> medicamentos.dosisRecomendada;
-
-                agregarMedicamento(medicamentos);
-                break;
-            case 2:
-                string nombre;
-                cout << "Ingrese el nombre del medicamento que desea buscar";
-                cin >> nombre;
-                actualizarMedicamento(nombre, medicamentos);
+            if (nombre == med.nom) {
+                return med;
             }
         }
     }
+
+    void agregarAlInventario() {
+        string nombre;
+        cout << "Nombre del medicamento: " << endl;
+        cin >> nombre;
+
+        int cantidadStock;
+        string fechaCaducidad;
+        double precioCompra;
+        double precioVenta;
+
+        cout << "Ingrese la cantidad en Stock: " << endl;
+        cin >> cantidadStock;
+
+        cout << "Ingrese la fecha de caducidad: " << endl;
+        cin >> fechaCaducidad;
+
+        string nombreDeProveedor;
+        cout << "Ingrese el nombre del proveedor" << endl;
+        cin >> nombreDeProveedor;
+
+
+        cout << "Ingrese el precio de compra: " << endl;
+        cin >> precioCompra;
+
+        cout << "Ingrese el precio de venta: " << endl;
+        cin >> precioVenta;
+
+        Inventario inventario(cantidadStock, fechaCaducidad, dar(nombreDeProveedor), precioCompra, precioVenta);
+        agregarInventario(inventario);
+    }
+
+    void titulo() {
+
+        int xcol;
+        gotoxy(1, 2); printf("%c", 201);
+        gotoxy(1, 3); printf("%c", 186);
+        gotoxy(1, 4); printf("%c", 200);
+
+        for (xcol = 2; xcol <= 79; xcol++) {
+            gotoxy(xcol, 2); printf("%c", 205);
+            gotoxy(xcol, 4); printf("%c", 205);
+            Sleep(5);
+        }
+
+        gotoxy(80, 2); printf("%c", 187);
+        gotoxy(80, 3); printf("%c", 186);
+        gotoxy(80, 4); printf("%c", 188);
+
+        char titulo[] = "MENU FARMACIA";
+        int longitud;
+        longitud = strlen(titulo);
+        int vcentro = (((80 - longitud) / 2) + 1);
+        for (xcol = 2; xcol <= vcentro; xcol++) {
+            gotoxy(xcol, 3);
+            cout << ' ';
+            printf(titulo);
+            Sleep(30);
+        }
+
+        cout << endl;
+    }
+
+    void agregarMedicamento(const Medicamento& medicamento) {
+        medic.push_back(medicamento);
+    }
+
+    void agregarProveedor(const Proveedor& proveedor) {
+        prov.push_back(proveedor);
+    }
+
+    void agregarInventario(const Inventario& item) {
+        invent.push_back(item);
+        cout << "hola";
+    }
+
+    Medicamento buscarMedicamentoPorNombre(const string& nom) {
+        for (const Medicamento& med : medic) {
+            if (med.nom == nom) {
+                return med;
+            }
+        }
+        throw runtime_error("Medicamento no encontrado");
+    }
+
+    Medicamento buscarMedicamentoPorPrincipioActivo(const string& principioActivo) {
+        for (const Medicamento& med : medic) {
+            if (med.prinAct == principioActivo) {
+                return med;
+            }
+        }
+        throw runtime_error("Medicamento no encontrado");
+    }
+
+
+    Medicamento medicamentoMasCaroProveedor(const string& nombreProveedor) {
+        double precioMaximo = 0.0;
+        Medicamento medicamentoMasCaro;
+
+        for (const Inventario& item : invent) {
+            if (item.proveedor.nom == nombreProveedor && item.precCompra > precioMaximo) {
+                precioMaximo = item.precCompra;
+                medicamentoMasCaro = buscarMedicamentoPorNombre(item.proveedor.nom);
+            }
+        }
+
+        if (precioMaximo == 0.0) {
+            throw runtime_error("Proveedor no encontrado o no se encontraron medic suministrados por el proveedor");
+        }
+
+        return medicamentoMasCaro;
+    }
+
+    void generarInformeCSV() {
+        ofstream archivo("informe_medicamentos.csv");
+        archivo << "nom,numRegis,categ,prinAct,dosrec" << endl;
+        for (const Medicamento& med : medic) {
+            archivo << med.nom << "," << med.numRegis << "," << med.categ << "," << med.prinAct << "," << med.dosrec << endl;
+        }
+        archivo.close();
+    }
+
+    double calcularPrecioPromedio() {
+        double total = 0.0;
+        int count = 0;
+        for (const Inventario& item : invent) {
+            total += item.precVenta;
+            count++;
+        }
+        return total / count;
+    }
+
+    void agregarMedicamentoDesdeMenu() {
+        system("cls");
+        string nom;
+        string numRegis;
+        string categ;
+        string prinAct;
+        string dosrec;
+
+        cout << "=== Agregar Medicamento ===" << endl;
+        cout << "Ingrese el nom del medicamento: ";
+        cin.ignore();
+        getline(cin, nom);
+
+        cout << "Ingrese el número de registro: ";
+        cin.ignore();
+        cin >> numRegis;
+
+        cout << "Ingrese la categoría: ";
+        cin.ignore();
+        getline(cin, categ);
+
+        cout << "Ingrese los principios activos: ";
+        cin.ignore();
+        getline(cin, prinAct);
+
+        cout << "Ingrese la dosis recomendada: ";
+        cin.ignore();
+        getline(cin, dosrec);
+
+        Medicamento nuevoMedicamento(nom, numRegis, categ, prinAct, dosrec);
+        agregarMedicamento(nuevoMedicamento);
+        cout << "Medicamento agregado con éxito." << endl;
+
+        pausa();
+    }
+    void agregarProveedorDesdeMenu() {
+
+        system("cls");
+
+        string nom;
+        string nit;
+        string direcFiscal;
+        string direcContacto;
+        string celular;
+        string correo;
+
+        cout << "=== Agregar Proveedor ===" << endl;
+        cout << "Ingrese el nom del proveedor: ";
+        cin.ignore();
+        getline(cin, nom);
+
+        cout << "Ingrese el NIT del proveedor: ";
+        cin >> nit;
+
+        cout << "Ingrese la dirección fiscal: ";
+        cin.ignore();
+        getline(cin, direcFiscal);
+
+        cout << "Ingrese la dirección de contacto: ";
+        cin.ignore();
+        getline(cin, direcContacto);
+
+        cout << "Ingrese el número de teléfono: ";
+        cin >> celular;
+
+        cout << "Ingrese el correo electrónico: ";
+        cin >> correo;
+
+        Proveedor nuevoProveedor(nom, nit, direcFiscal, direcContacto, celular, correo);
+        agregarProveedor(nuevoProveedor);
+        cout << "Proveedor agregado con éxito." << endl;
+
+        pausa();
+    }
+
+
+    void mostrarMenu() {
+        int opcion;
+        do {
+            system("cls");
+            titulo();
+            cout << endl;
+            cout << "1. Consultar medicamento por nombre" << endl;
+            cout << "2. Consultar medicamento por principio activo" << endl;
+            cout << "3. Agregar medicamento" << endl;
+            cout << "4. Agregar proveedor" << endl;
+            cout << "5. Generar informe CSV de medicicamentos" << endl;
+            cout << "6. Calcular precio promedio de medicamentos" << endl;
+            cout << "7. Encontrar medicamento más caro de un proveedor" << endl;
+            cout << "8. Agregar inventario" << endl;
+            cout << "9. Salir" << endl;
+            cout << "Ingrese su opción: ";
+            cin >> opcion;
+
+            switch (opcion) {
+            case 1:
+            {
+                system("cls");
+                string nom;
+                cout << "Ingrese el nom del medicamento: ";
+                cin.ignore();
+                getline(cin, nom);
+                try {
+                    Medicamento med = buscarMedicamentoPorNombre(nom);
+                    cout << "Información del medicamento:" << endl;
+                    cout << "nom: " << med.nom << endl;
+                    cout << "Número de Registro: " << med.numRegis << endl;
+                    cout << "Categoría: " << med.categ << endl;
+                    cout << "Principios Activos: " << med.prinAct << endl;
+                    cout << "Dosis Recomendada: " << med.dosrec << endl;
+                }
+                catch (const runtime_error& e) {
+                    cerr << e.what() << endl;
+                }
+                pausa();
+            }
+            break;
+            case 2:
+            {
+                system("cls");
+                string principioActivo;
+                cout << "Ingrese el principio activo del medicamento: ";
+                cin.ignore();
+                getline(cin, principioActivo);
+                try {
+                    Medicamento med = buscarMedicamentoPorPrincipioActivo(principioActivo);
+                    cout << "Información del medicamento:" << endl;
+                    cout << "nom: " << med.nom << endl;
+                    cout << "Número de Registro: " << med.numRegis << endl;
+                    cout << "Categoría: " << med.categ << endl;
+                    cout << "Principios Activos: " << med.prinAct << endl;
+                    cout << "Dosis Recomendada: " << med.dosrec << endl;
+                }
+                catch (const runtime_error& e) {
+                    cerr << e.what() << endl;
+                }
+                pausa();
+            }
+            break;
+            case 3:
+                agregarMedicamentoDesdeMenu();
+                break;
+            case 4:
+                agregarProveedorDesdeMenu();
+                break;
+            case 5:
+                generarInformeCSV();
+                break;
+            case 6:
+                system("cls");
+                cout << "Precio promedio de los medic: Q" << calcularPrecioPromedio() << endl;
+                pausa();
+                break;
+            case 7:
+            {
+                system("cls");
+                string nombreProveedor;
+                cout << "Ingrese el nombre del proveedor: ";
+                cin.ignore();
+                getline(cin, nombreProveedor);
+                try {
+                    Medicamento masCaro = medicamentoMasCaroProveedor(nombreProveedor);
+                    cout << "Medicamento más caro suministrado por " << nombreProveedor << ": " << masCaro.nom << endl;
+                }
+                catch (const runtime_error& e) {
+                    cerr << e.what() << endl;
+                }
+                pausa();
+            }
+            break;
+            case 8:
+                agregarAlInventario();
+            case 9:
+                cout << "Saliendo del programa." << endl;
+                break;
+            default:
+                cout << "Opcion no válida. Intente de nuevo." << endl;
+            }
+        } while (opcion != 9);
+    }
+
 };
 
 int main() {
-    // Aquí va la lógica principal del programa, creando un objeto de la clase Farmacia y llamando a sus métodos.
-    Farmacia a;
-    a.mostrarMenu();
-    return 0;
+    Farmacia farma;
+    farma.mostrarMenu();
 }
